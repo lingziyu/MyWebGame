@@ -1,0 +1,22 @@
+{
+  "name": "mywebgame",
+  "version": "1.0.0",
+  "description": "none",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lingziyu/MyWebGame.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lingziyu/MyWebGame/issues"
+  },
+  "homepage": "https://github.com/lingziyu/MyWebGame#readme",
+  "dependencies": {
+    "babel-preset-env": "^1.6.1"
+  }
+}
