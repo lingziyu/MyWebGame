@@ -1,8 +1,8 @@
 <template>
 
   <div class="gameCard">
-    <el-carousel  height="600px">
-      <el-carousel-item v-for="item in 4" :key="item">
+    <el-carousel  :height="height">
+      <el-carousel-item v-for="item in items" :key="item">
         <h3>{{ item }}</h3>
       </el-carousel-item>
     </el-carousel>
@@ -13,9 +13,18 @@
 <script>
   export default {
     name: 'GameCard',
+    mounted(){
+      this.height = window.innerHeight - 60 + "px";
+    },
     data () {
       return {
-
+        height:"",
+        items:[
+          "A Color Game",
+          "Bubble Change",
+          "Test Color Sensitivity",
+          "More Game"
+        ]
       }
     }
   }
@@ -28,7 +37,7 @@
   }
   .el-carousel__item h3 {
     color: #475669;
-    font-size: 80pt;
+    font-size: 40pt;
     opacity: 0.75;
     line-height: 600px;
     margin: 0;
