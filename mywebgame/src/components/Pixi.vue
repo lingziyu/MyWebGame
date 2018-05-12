@@ -1,23 +1,28 @@
 <template>
   <div class="pixi">
+    <my-header activeIndex="/pixi"></my-header>
   </div>
 </template>
 
 <script>
   import * as pixi from 'pixi.js'
+  import MyHeader from './MyHeader'
 
   export default {
+    components: {MyHeader},
     name: 'PIXI',
     data() {
       return {
+        winDifficult:15,
         backgroundColor: 0xffffff,
         app: {},
-        scoreTitle: {},
+        title: {},
         score: 0,
         gameScene: {},
         gameOverScene: {},
         message: {},
         fontColor: 0x3f3f3f,
+        difficult: 120
       }
     },
     mounted() {
@@ -38,7 +43,7 @@
       this.app.stage.addChild(this.gameOverScene);
       this.gameOverScene.visible = false;
 
-      this.setAGame(150);
+      this.setAGame(120);
 
       let credit = new pixi.TextStyle({
         fontFamily: "Futura",
@@ -46,11 +51,11 @@
         fill: this.fontColor,
       });
 
-      this.scoreTitle = new pixi.Text("Score: " + this.score, credit);
-      this.scoreTitle.x = window.innerWidth / 2 - 100;
-      this.scoreTitle.y = 30;
+      this.title = new pixi.Text("Score: " + this.score + ' Difficult: ' + this.difficult , credit);
+      this.title.x = window.innerWidth / 2 - 230;
+      this.title.y = 30;
 
-      this.gameScene.addChild(this.scoreTitle);
+      this.gameScene.addChild(this.title);
 
       const style = new pixi.TextStyle({
         fontFamily: "Futura",
@@ -77,13 +82,13 @@
 
       },
 
-      setAGame: function (difficult) {
+      setAGame: function () {
         let ranColor = this.randomColor();
-        let resultColor = this.getResultColor(ranColor, difficult);
-        let num = parseInt(180 / difficult);
+        let resultColor = this.getResultColor(ranColor);
+        let num = parseInt(180 / this.difficult);
         num = num > 6 ? 6 : num;
         num = num < 2 ? 2 : num;
-        this.createAllColor(difficult, window.innerWidth / 2, 150, num, window.innerWidth / 2 / num, 5, ranColor, resultColor);
+        this.createAllColor( window.innerWidth / 2, 150, num, window.innerWidth / 3 / num, 5, ranColor, resultColor);
 
       },
       randomColor: function () {
@@ -94,21 +99,21 @@
         return color;
       },
 
-      getResultColor: function getResultColor(ranColor, difficult) {
+      getResultColor: function getResultColor(ranColor) {
         let array = this.hex2RgbArray(ranColor);
         let newArray = new Array(3);
         const weightArray = [2 / 9, 4 / 9, 3 / 9];
         for (let i = 0; i < array.length; i++) {
-          newArray[i] = array[i] + parseInt(difficult * weightArray[i]);
+          newArray[i] = array[i] + parseInt(this.difficult * weightArray[i]);
           if (!this.checkColor(newArray[i])) {
-            newArray[i] = array[i] - parseInt(difficult * weightArray[i]);
+            newArray[i] = array[i] - parseInt(this.difficult * weightArray[i]);
           }
         }
         return this.rgbArray2Hex(newArray);
       },
 
 
-      createAllColor: function (difficult, posx, posy, n, size, margin, color1, color2) {
+      createAllColor: function ( posx, posy, n, size, margin, color1, color2) {
         let self = this;
 
         let randomx = self.randomInt(0, n - 1);
@@ -128,10 +133,11 @@
               block2.interactive = true;
               block2.buttonMode = true;
               block2.click = function (event) {
-                if (difficult > 8) {
+                if (self.difficult > self.winDifficult) {
+                  // console.log(self.difficult + ' ' + self.winDifficult)
                   self.score += 5;
-                  self.scoreTitle.text = "Score: " + self.score;
-                  self.setAGame(self.renewDifficult(difficult, true));
+                  self.setAGame(self.renewDifficult(self.difficult, true));
+                  self.title.text = "Score: " + self.score  + ' Difficult: ' + self.difficult ;
                 } else {
                   self.message.text = "You win!";
                   self.end();
@@ -144,8 +150,8 @@
               block1.click = function (event) {
                 self.score -= 10;
                 if (self.score >= 0) {
-                  self.scoreTitle.text = "Score: " + self.score;
-                  self.setAGame(self.renewDifficult(difficult, false));
+                  self.setAGame(self.renewDifficult(self.difficult, false));
+                  self.title.text = "Score: " + self.score + ' Difficult: ' + self.difficult ;
                 } else {
                   self.message.text = "You lose!";
                   self.end();
@@ -161,21 +167,20 @@
         this.gameOverScene.visible = true;
       },
 
-      renewDifficult: function (difficult, descrese) {
-        console.log(difficult)
+      renewDifficult: function ( descrese) {
         if (descrese) {
-          difficult -= difficult / 4;
-          if (difficult < 12) {
-            return 8;
+          this.difficult -= this.difficult / 4;
+          if (this.difficult < 12) {
+            this.difficult =  12;
           } else {
-            return parseInt(difficult);
+            this.difficult = parseInt(this.difficult);
           }
         } else {
-          difficult += difficult / 2;
-          if (difficult > 200) {
-            return 200;
+          this.difficult += this.difficult / 2;
+          if (this.difficult > 200) {
+            this.difficult =  200;
           } else {
-            return parseInt(difficult);
+            this.difficult = parseInt(this.difficult);
           }
         }
       },
