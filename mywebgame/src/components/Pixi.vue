@@ -51,8 +51,8 @@
         fill: this.fontColor,
       });
 
-      this.title = new pixi.Text("Score: " + this.score + ' Difficult: ' + this.difficult , credit);
-      this.title.x = window.innerWidth / 2 - 230;
+      this.title = new pixi.Text("Score: " + this.score  , credit);
+      this.title.x = window.innerWidth / 2 - 90;
       this.title.y = 30;
 
       this.gameScene.addChild(this.title);
@@ -137,7 +137,7 @@
                   // console.log(self.difficult + ' ' + self.winDifficult)
                   self.score += 5;
                   self.setAGame(self.renewDifficult(self.difficult, true));
-                  self.title.text = "Score: " + self.score  + ' Difficult: ' + self.difficult ;
+                  self.title.text = "Score: " + self.score ;
                 } else {
                   self.message.text = "You win!";
                   self.end();
@@ -151,7 +151,7 @@
                 self.score -= 10;
                 if (self.score >= 0) {
                   self.setAGame(self.renewDifficult(self.difficult, false));
-                  self.title.text = "Score: " + self.score + ' Difficult: ' + self.difficult ;
+                  self.title.text = "Score: " + self.score ;
                 } else {
                   self.message.text = "You lose!";
                   self.end();
