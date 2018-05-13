@@ -145,7 +145,7 @@
 
       play: function (i,delta) {
         // console.log(i)
-        this.healthBar.outer.width -= this.windowWidth / 3000;
+        this.healthBar.outer.width -= this.windowWidth / 2500;
         if (this.healthBar.outer.width <= 0) {
           this.end();
         }
