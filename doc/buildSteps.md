@@ -27,3 +27,15 @@ npm install pixi.js
 import * as PIXI from 'pixi.js'
 ```
 
+
+
+###Install Pharse
+
+```
+npm install --save p2  
+```
+
+```
+npm install --save phaser  
+```
+
