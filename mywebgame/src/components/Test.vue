@@ -1,85 +1,154 @@
 <template>
-  <div class="pixi">
-    <my-header activeIndex="/pixi"></my-header>
+  <div class="PIXI">
+    <my-header activeIndex="/test"></my-header>
+    <div id="btn-set">
+      <el-button type="primary" v-on:click="startTest()">Test Again</el-button>
+    </div>
   </div>
 </template>
 
 <script>
-  import * as pixi from 'pixi.js'
+  import * as PIXI from 'pixi.js'
   import MyHeader from './MyHeader'
+  import ElButton from "element-ui/packages/button/src/button";
 
   export default {
-    components: {MyHeader},
-    name: 'PIXI',
+    components: {
+      ElButton,
+      MyHeader
+    },
+    name: 'Test',
     data() {
       return {
-        winDifficult:15,
+        winDifficult: 15,
         backgroundColor: 0xffffff,
         app: {},
         title: {},
-        score: 0,
         gameScene: {},
         gameOverScene: {},
         message: {},
         fontColor: 0x3f3f3f,
-        difficult: 120
+        difficult: 0,
+        healthBar: {},
+        windowHeight: 600,
+        windowWidth: 800,
+        error: 0,
+        initDifficult: 112,
+        score: {},
+        finalScore: 0,
+        myTicker:{}
       }
     },
+
+    destroyed(){
+      this.myTicker.stop()
+    },
+
     mounted() {
-      this.app = new pixi.Application({
+      this.windowWidth = window.innerWidth;
+      this.windowHeight = window.innerHeight - 60;
+      this.app = new PIXI.Application({
         width: 512,
         height: 512,
         antialias: true, //antialias使得字体的边界和几何图形更加圆滑
         transparent: true,
         resolution: 1 //resolution让Pixi在不同的分辨率和像素密度的平台上运行变得简单
-      }),
-        this.$el.append(this.app.view)
+      });
+
+      this.$el.append(this.app.view);
       this.app.autoResize = true;
-      this.app.renderer.resize(window.innerWidth, window.innerHeight);
+      this.app.renderer.resize(this.windowWidth, this.windowHeight);
 
-      this.gameScene = new pixi.Container();
+      this.gameScene = new PIXI.Container();
       this.app.stage.addChild(this.gameScene);
-      this.gameOverScene = new pixi.Container();
+      this.gameOverScene = new PIXI.Container();
       this.app.stage.addChild(this.gameOverScene);
-      this.gameOverScene.visible = false;
-
-      this.setAGame(120);
-
-      let credit = new pixi.TextStyle({
+      const style = new PIXI.TextStyle({
         fontFamily: "Futura",
-        fontSize: 48,
+        fontSize: 36,
         fill: this.fontColor,
       });
+      let tilte = new PIXI.Text("Click the Different Color", style);
+      tilte.x = this.windowWidth / 2 - tilte.width / 2;
+      tilte.y = 50;
+      this.gameScene.addChild(tilte);
 
-      this.title = new pixi.Text("Score: " + this.score  , credit);
-      this.title.x = window.innerWidth / 2 - 90;
-      this.title.y = 30;
 
-      this.gameScene.addChild(this.title);
-
-      const style = new pixi.TextStyle({
-        fontFamily: "Futura",
-        fontSize: 64,
-        fill: this.fontColor,
-      });
-      this.message = new pixi.Text("The End!", style);
-      this.message.x = window.innerWidth / 2 - 150;
-      this.message.y = window.innerHeight / 2 - 80;
-
+      this.message = new PIXI.Text("You Sensitivity", style);
+      this.message.x = this.windowWidth / 2 - this.message.width / 2;
+      this.message.y = this.windowHeight / 2 - 180;
       this.gameOverScene.addChild(this.message);
 
-      pixi.state = this.play;
-      this.app.ticker.add(delta => this.gameLoop(delta));
+      const scoreStyle = new PIXI.TextStyle({
+        fontFamily: "Futura",
+        fontSize: 80,
+        fill: 0xe4bb4e,
+      });
+
+      this.score = new PIXI.Text("End", scoreStyle);
+      this.score.y = this.windowHeight / 2 - 100;
+
+      this.gameOverScene.addChild(this.score);
+
+      //Create the health bar
+      this.healthBar = new PIXI.Container();
+      this.healthBar.position.set(0, 0);
+      this.gameScene.addChild(this.healthBar);
+
+//Create the black background rectangle
+      let innerBar = new PIXI.Graphics();
+      innerBar.beginFill(0xEBEEF5);
+      innerBar.drawRect(0, 0, this.windowWidth, 8);
+      innerBar.endFill();
+      this.healthBar.addChild(innerBar);
+
+//Create the front red rectangle
+      let outerBar = new PIXI.Graphics();
+      outerBar.beginFill(0xF36D6E);
+      outerBar.drawRoundedRect(0, 0, this.windowWidth, 8, 4);
+      outerBar.endFill();
+      this.healthBar.addChild(outerBar);
+
+      this.healthBar.outer = outerBar;
+
+      this.startTest();
+      this.healthBar.outer.width = this.windowWidth;
+      PIXI.state = this.play;
+      // console.log(this.app.ticker)
+      //  if(this.app.ticker.started)
+      //      this.app.ticker.add(delta => this.gameLoop(delta));
+
+       this.myTicker = new PIXI.ticker.Ticker().add((delta) => {
+        this.gameLoop(delta)
+      });
+      this.myTicker.start()
 
     },
     methods: {
-      gameLoop: function (delta) {
-        //Runs the current game `state` in a loop and renders the sprites
-        pixi.state(delta);
+
+
+      startTest: function () {
+        this.gameOverScene.visible = false;
+        this.gameScene.visible = true;
+
+        this.difficult = this.initDifficult;
+        this.setAGame(this.initDifficult);
+        this.healthBar.outer.width = this.windowWidth;
+        document.getElementById('btn-set').style.display = 'none'
       },
 
-      play: function (delta) {
 
+      gameLoop: function (delta) {
+        //Runs the current game `state` in a loop and renders the sprites
+        PIXI.state(delta);
+      },
+
+      play: function (i,delta) {
+        // console.log(i)
+        this.healthBar.outer.width -= this.windowWidth / 3000;
+        if (this.healthBar.outer.width <= 0) {
+          this.end();
+        }
       },
 
       setAGame: function () {
@@ -88,7 +157,7 @@
         let num = parseInt(180 / this.difficult);
         num = num > 6 ? 6 : num;
         num = num < 2 ? 2 : num;
-        this.createAllColor( window.innerWidth / 2, 150, num, window.innerWidth / 3 / num, 5, ranColor, resultColor);
+        this.createAllColor(this.windowWidth / 2, 150, num, this.windowWidth / 3 / num, 5, ranColor, resultColor);
 
       },
       randomColor: function () {
@@ -113,13 +182,13 @@
       },
 
 
-      createAllColor: function ( posx, posy, n, size, margin, color1, color2) {
+      createAllColor: function (posx, posy, n, size, margin, color1, color2) {
         let self = this;
 
         let randomx = self.randomInt(0, n - 1);
         let randomy = self.randomInt(0, n - 1);
 
-        let rectangle = new pixi.Graphics();
+        let rectangle = new PIXI.Graphics();
         rectangle.beginFill(this.backgroundColor);
         rectangle.drawRoundedRect(posx - n * size / 2, posy, n * size + 5 * margin, n * size + 5 * margin, 0);
         rectangle.endFill();
@@ -133,27 +202,23 @@
               block2.interactive = true;
               block2.buttonMode = true;
               block2.click = function (event) {
-                if (self.difficult > self.winDifficult) {
-                  // console.log(self.difficult + ' ' + self.winDifficult)
-                  self.score += 5;
-                  self.setAGame(self.renewDifficult(self.difficult, true));
-                  self.title.text = "Score: " + self.score ;
+                if (self.difficult > 12) {
+                  self.setAGame(self.renewDifficult(true));
                 } else {
-                  self.message.text = "You win!";
                   self.end();
                 }
+
               };
             } else {
               let block1 = self.createOneColor(posx - n * size / 2 + i * size + i * margin, posy + j * size + j * margin, size, color1, 5);
               block1.interactive = true;
               block1.buttonMode = true;
               block1.click = function (event) {
-                self.score -= 10;
-                if (self.score >= 0) {
-                  self.setAGame(self.renewDifficult(self.difficult, false));
-                  self.title.text = "Score: " + self.score ;
+                self.error++;
+                self.healthBar.outer.width -= self.windowWidth / 5;
+                if (self.healthBar.outer.width > 0) {
+                  self.setAGame(self.renewDifficult(false));
                 } else {
-                  self.message.text = "You lose!";
                   self.end();
                 }
               };
@@ -163,22 +228,32 @@
       },
 
       end: function () {
+        this.finalScore = this.initDifficult - this.difficult - this.error * 4;
+        if (this.finalScore < 0) {
+          this.finalScore = 0;
+        }
+        this.score.text = this.finalScore;
+        this.score.x = this.windowWidth / 2 - this.score.width / 2;
         this.gameScene.visible = false;
         this.gameOverScene.visible = true;
+        if (document.getElementById('btn-set')) {
+          document.getElementById('btn-set').style.display = 'inline-block';
+        }
+        this.myTicker.stop()
       },
 
-      renewDifficult: function ( descrese) {
+      renewDifficult: function (descrese) {
         if (descrese) {
           this.difficult -= this.difficult / 4;
           if (this.difficult < 12) {
-            this.difficult =  12;
+            this.difficult = 12;
           } else {
             this.difficult = parseInt(this.difficult);
           }
         } else {
-          this.difficult += this.difficult / 2;
-          if (this.difficult > 200) {
-            this.difficult =  200;
+          this.difficult += this.difficult;
+          if (this.difficult > 120) {
+            this.difficult = 120;
           } else {
             this.difficult = parseInt(this.difficult);
           }
@@ -190,7 +265,7 @@
       },
 
       createOneColor: function (colorx, colory, size, color, rad) {
-        let rectangle = new pixi.Graphics();
+        let rectangle = new PIXI.Graphics();
         rectangle.beginFill(color);
         rectangle.drawRoundedRect(colorx, colory, size, size, rad);
         rectangle.endFill();
@@ -257,3 +332,15 @@
     }
   }
 </script>
+
+
+<style scoped>
+  #btn-set {
+    display: inline-block;
+    position: absolute;
+    text-align: center;
+    vertical-align: middle;
+    width: 100%;
+    top: 420px;
+  }
+</style>

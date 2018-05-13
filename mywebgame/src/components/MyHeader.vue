@@ -2,8 +2,8 @@
   <div class="myheader">
     <el-menu :router="isRouter"  :default-active="activeIndex" background-color='#191919' text-color="#A4A4A4" active-text-color='#ffffff' class="el-menu-demo" mode="horizontal" @select="handleSelect">
       <el-menu-item index="/"><i class="el-icon-menu"></i>Color Game</el-menu-item>
-      <el-menu-item index="/bubble">Color Bubble</el-menu-item>
-      <el-menu-item index="/pixi">Color Test</el-menu-item>
+      <el-menu-item index="/bubble">Bubble</el-menu-item>
+      <el-menu-item index="/test">Test</el-menu-item>
 
     </el-menu>
     <div class="line"></div>
@@ -24,7 +24,7 @@
     },
     methods: {
       handleSelect(key, keyPath) {
-        console.log(key, keyPath);
+        // console.log(key, keyPath);
       }
     }
   }
