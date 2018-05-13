@@ -31,7 +31,7 @@ export default {
     },
 
     testGame:function () {
-      this.$router.push({name: 'PIXI'})
+      this.$router.push({name: 'Test'})
     }
   }
 }
