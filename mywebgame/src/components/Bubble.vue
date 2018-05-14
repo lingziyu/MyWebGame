@@ -28,7 +28,6 @@
         windowWidth: 0,
         windowHeight: 0,
         graphics: {},
-        colorLock: [],
         myBubble: {
           radius: 0,
           color: 0xffffff,
@@ -131,44 +130,48 @@
 
       createMyBubble: function (vue) {
         let self = this;
+        self.graphics = vue.add.graphics();
 
-        this.myBubble.pointerCircle = new Phaser.Geom.Circle(400, 300, 20);
+        let radius = 20;
+        let x = 400;
+        let y = 300;
+        this.myBubble.pointerCircle = new Phaser.Geom.Circle(x, y, radius);
 
-        vue.input.on('pointermove', function (pointer) {
+        let myBubble = vue.impact.add.body(x - radius, y - radius).setBounce(1);
+        myBubble.setBodySize(radius * 2, radius * 2);
 
-          self.myBubble.pointerCircle.x = pointer.x;
-          self.myBubble.pointerCircle.y = pointer.y;
 
-        });
+        myBubble.body.updateCallback = function (body) {
+
+          self.drawCircle(body.pos.x, body.pos.y, radius, self.myBubble.color);
+
+
+          vue.input.on('pointermove', function (pointer) {
+            body.pos.x = pointer.x - radius;
+            body.pos.y = pointer.y - radius;
+            self.myBubble.pointerCircle.x = pointer.x;
+            self.myBubble.pointerCircle.y = pointer.y;
+
+          });
+
+
+        };
       },
 
-      drawStar: function (graphics, cx, cy, spikes, outerRadius, innerRadius, color) {
-        var rot = Math.PI / 2 * 3;
-        var x = cx;
-        var y = cy;
-        var step = Math.PI / spikes;
+      drawCircle: function (x, y, radius, color) {
+        this.graphics.clear();
+        this.graphics.lineStyle(4, this.myBubble.color);
+        this.graphics.strokeCircleShape(this.myBubble.pointerCircle);
 
-        graphics.fillStyle(color, 1);
-        graphics.beginPath();
-        graphics.moveTo(cx, cy - outerRadius);
-
-        for (let i = 0; i < spikes; i++) {
-          x = cx + Math.cos(rot) * outerRadius;
-          y = cy + Math.sin(rot) * outerRadius;
-          graphics.lineTo(x, y);
-          rot += step;
-
-          x = cx + Math.cos(rot) * innerRadius;
-          y = cy + Math.sin(rot) * innerRadius;
-          graphics.lineTo(x, y);
-          rot += step;
-        }
-
-        graphics.lineTo(cx, cy - outerRadius);
-        graphics.closePath();
-        graphics.fillPath();
-        graphics.strokePath();
       },
+
+      // drawBuble: function (graphics, x, y, radius, color) {
+      //
+      //   graphics.fillStyle(color, 0.6);
+      //   let circle = new Phaser.Geom.Circle(x, y, radius);
+      //   graphics.fillCircleShape(circle);
+      //
+      // },
 
       create: function (vue) {
         let self = this;
@@ -177,53 +180,66 @@
 
         vue.impact.world.setBounds();
 
-        //  Create a Graphics object
-        let graphics = vue.add.graphics();
+        vue.input.on('gameobjectdown', function (pointer) {
 
-        //  If you don't set the body as active it won't collide with the world bounds
-        let star = vue.impact.add.body(200, 200).setActiveCollision().setVelocity(50, 50).setBounce(1);
+        });
+        let colorLock = [];
 
-        //  Set a body size of 100x100
-        star.setBodySize(100, 100);
+        for (let i = 0; i < 10; i++) {
 
-        star.body.updateCallback = function (body) {
-          graphics.clear();
+          colorLock.push(false);
 
-          self.drawStar(graphics, body.pos.x + 50, body.pos.y + 50, 5, 64, 64 / 2, 0x0000ff);
-        };
+          let vx = self.randomInt(50, 100);
+          let vy = self.randomInt(50, 100);
+          let radius = self.randomSize();
+
+          let x = self.randomInt(radius + 20, self.windowWidth - radius - 20);
+          let y = self.randomInt(radius + 20, self.windowHeight - radius - 20);
+          let color = self.randomColor();
+
+
+          //  Create a Graphics object
+          let graphics = vue.add.graphics();
+          let bubble = vue.impact.add.body(x, y).setActiveCollision().setVelocity(vx, vy).setBounce(1);
+          bubble.setBodySize(radius * 2, radius * 2);
+          bubble.body.id = i;
+          bubble.body.updateCallback = function (body) {
+            graphics.clear();
+
+            graphics.fillStyle(color, 0.6);
+            let circle = new Phaser.Geom.Circle(body.pos.x + radius, body.pos.y + radius, radius);
+            graphics.fillCircleShape(circle);
+
+            self.graphics.clear();
+            self.graphics = vue.add.graphics();
+
+            if (Phaser.Geom.Intersects.CircleToCircle(circle, self.myBubble.pointerCircle)) {
+              if (!colorLock[body.id]) {
+                colorLock[body.id] = true;
+                self.myBubble.color = self.colorAfterHit(color);
+                self.graphics.lineStyle(4, color);
+              } else {
+                self.graphics.lineStyle(4, self.myBubble.color);
+              }
+            }
+            else {
+              colorLock[body.id] = false;
+              self.graphics.lineStyle(4, self.myBubble.color);
+            }
+            self.graphics.strokeCircleShape(self.myBubble.pointerCircle);
+
+
+          };
+
+        }
 
 
         this.createMyBubble(vue);
 
-        for (let i = 0; i < 13; i++) {
-          this.createARandomBubble(vue);
-          this.colorLock[i] = false;
-        }
-
-
       },
 
-      update: function () {
+      update: function (vue) {
 
-        this.graphics.clear();
-
-        for (let i = 0; i < this.bubbles.length; i++) {
-          if (Phaser.Geom.Intersects.CircleToCircle(this.bubbles[i].circle, this.myBubble.pointerCircle)) {
-            if (!this.colorLock[i]) {
-              this.colorLock[i] = true;
-              this.myBubble.color = this.colorAfterHit(this.bubbles[i].color);
-              this.graphics.lineStyle(4, this.bubbles[i].color);
-            } else {
-              this.graphics.lineStyle(4, this.myBubble.color);
-            }
-
-          } else {
-            this.colorLock[i] = false;
-
-            this.graphics.lineStyle(4, this.myBubble.color);
-          }
-          this.graphics.strokeCircleShape(this.myBubble.pointerCircle);
-        }
 
       },
 
@@ -277,24 +293,7 @@
         return Math.floor(Math.random() * (max - min + 1)) + min;
       },
 
-      createABubble(x, y, radius, color, vue) {
 
-
-        let circle = new Phaser.Geom.Circle(x, y, radius);
-        this.graphics = vue.add.graphics({fillStyle: {color: color}});
-        this.graphics.setAlpha(0.6);
-        this.graphics.fillCircleShape(circle);
-
-        console.log(circle.body)
-
-        this.bubbleNum++;
-        this.bubbles.push({
-          id: this.bubbleNum,
-          color: color,
-          radius: radius,
-          circle: circle,
-        })
-      }
     }
 
   }
