@@ -1,7 +1,7 @@
 <template>
   <div class="bubble">
     <my-header activeIndex="/bubble"></my-header>
-
+    <div id="game"></div>
   </div>
 </template>
 
@@ -20,58 +20,169 @@
     name: 'Bubble',
     data() {
       return {
+        gameState: {},
         app: {},
-        height: 600,
-        width: 800,
-        bubbles:[],
-        bubbleNum:0
+        game: {},
+        bubbles: [],
+        bubbleNum: 0,
+        windowWidth:0,
+        windowHeight:0,
+        graphics:{},
+        colorLock:[],
+        myBubble:{
+          radius:0,
+          color:0xffffff,
+          pointerCircle:{},
+        },
       }
     },
 
     mounted() {
-      this.width = window.innerWidth;
-      this.height = window.innerHeight - 60;
+      this.windowWidth = window.innerWidth;
+      this.windowHeight = window.innerHeight - 60;
 
-      window.addEventListener("resize", this.resizeCanvas, false);
+      let self = this;
 
+      let config = {
+        type: Phaser.AUTO,
+          transparent:false,
+          backgroundColor:0xdddddd,
+          width: 800,
+          height: 600,
 
-      this.app = new PIXI.Application({
-        width: 512,
-        height: 512,
-        antialias: true, //antialias使得字体的边界和几何图形更加圆滑
-        transparent: false,
-        resolution: 1 //resolution让Pixi在不同的分辨率和像素密度的平台上运行变得简单
-      });
+          physics: {
+        default: 'arcade',
+            arcade: {
+            gravity: {y: 200}
+          }
+        },
+        scene: {
+          preload: function () {
+            let scene = this;
+            self.preload(scene)
+          },
+          create: function () {
+            let scene = this;
+            self.create(scene)
+          },
 
-      this.$el.append(this.app.view);
-      this.app.renderer.backgroundColor = 0xeeeeee;
-      this.app.autoResize = true;
-      this.app.renderer.resize(this.width, this.height);
+          update:function () {
+            let scene = this;
+            self.update(scene)
+          }
+        }
+      };
 
+      config.width = window.innerWidth;
+      config.height = window.innerHeight - 60;
 
-      this.startGame();
+      this.game = new Phaser.Game(config);
+
     },
 
 
     methods: {
+
+
+      colorIndex:function (color) {
+          switch (color) {
+            case 0xffffff:
+              return 0;
+            case 0xF56C6C://红色
+              return 1;
+            case 0xf9fc4e://黄色
+              return 2;
+            case 0x409EFF://蓝色
+              return 3;
+            case 0xE6A23C://橙色
+              return 4;
+            case 0x7e62d5://紫色
+              return 5;
+            case 0x67C23A://绿色
+              return 6;
+          }
+      },
+
+      colorAfterHit:function (hitColor) {
+        let myColorIndex = this.colorIndex(this.myBubble.color);
+        let hitColorIndex = this.colorIndex(hitColor);
+        let colorTable = [
+          [0xffffff,0xF56C6C,0xf9fc4e,0x409EFF,0xE6A23C,0x7e62d5,0x67C23A],
+          [0xF56C6C,0xF56C6C,0xE6A23C,0x7e62d5,0xE6A23C,0x7e62d5,0xffffff],
+          [0xf9fc4e,0xE6A23C,0xf9fc4e,0x67C23A,0xE6A23C,0xffffff,0x67C23A],
+          [0x409EFF,0x7e62d5,0x67C23A,0x409EFF,0xffffff,0x7e62d5,0x67C23A],
+          [0xE6A23C,0xE6A23C,0xE6A23C,0xffffff,0xE6A23C,0xffffff,0xffffff],
+          [0x7e62d5,0x7e62d5,0xffffff,0x7e62d5,0xffffff,0x7e62d5,0xffffff],
+          [0x67C23A,0xffffff,0x67C23A,0x67C23A,0xffffff,0xffffff,0x67C23A]];
+        return colorTable[myColorIndex][hitColorIndex];
+      },
+
+      preload:function (vue) {
+        // vue.load.image('logo', 'logo.png');
+      },
 
       resizeCanvas: function () {
         let canvas = document.getElementsByTagName('canvas')[0];
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight - 60;
       },
-      startGame: function () {
-        for(let i = 0; i < 5; i++){
-          this.createARandomBubble();
-        }
+
+
+      createMyBubble:function (vue) {
+        let self = this;
+
+        this.myBubble.pointerCircle = new Phaser.Geom.Circle(400, 300, 20);
+
+        vue.input.on('pointermove', function (pointer) {
+
+          self.myBubble.pointerCircle.x = pointer.x;
+          self.myBubble.pointerCircle.y = pointer.y;
+
+        });
       },
 
-      createARandomBubble() {
-        let size = this.randomSize();
-        let x = this.randomInt(size / 2 + 10, this.width/2 - size - 10);
-        let y = this.randomInt(size / 2 + 10, this.height/2 - size - 10);
+      create: function (vue) {
+        this.createMyBubble(vue);
 
-        this.createABubble(x, y, size, this.randomColor());
+        for (let i = 0; i < 13; i++) {
+          this.createARandomBubble(vue);
+          this.colorLock[i] = false;
+        }
+
+
+      },
+
+      update:function () {
+
+        this.graphics.clear();
+
+        for(let i=0;i<this.bubbles.length;i++){
+          if (Phaser.Geom.Intersects.CircleToCircle(this.bubbles[i].circle, this.myBubble.pointerCircle))
+          {
+            if(!this.colorLock[i]) {
+              this.colorLock[i] = true;
+              this.myBubble.color = this.colorAfterHit(this.bubbles[i].color);
+              this.graphics.lineStyle(4, this.bubbles[i].color);
+            }else {
+              this.graphics.lineStyle(4, this.myBubble.color);
+            }
+
+          }else {
+            this.colorLock[i] = false;
+
+            this.graphics.lineStyle(4, this.myBubble.color);
+          }
+          this.graphics.strokeCircleShape(this.myBubble.pointerCircle);
+        }
+
+      },
+
+      createARandomBubble(vue) {
+        let size = this.randomSize();
+        let x = this.randomInt(size + 20, this.windowWidth - size - 20);
+        let y = this.randomInt(size + 20, this.windowHeight - size - 20);
+
+        this.createABubble(x, y, size, this.randomColor(), vue);
       },
 
       randomColor: function () {
@@ -79,18 +190,18 @@
         switch (index) {
           case 0:
             return 0xffffff;
-          case 1:
-            return 0x409EFF;
-          case 2:
-            return 0x67C23A;
-          case 3:
-            return 0xE6A23C;
-          case 4:
+          case 1://红色
             return 0xF56C6C;
-          case 5:
-            return 0xea7035;
-          case 6:
+          case 2://黄色
+            return 0xf9fc4e;
+          case 3://蓝色
+            return 0x409EFF;
+          case 4://橙色
+            return 0xE6A23C;
+          case 5://紫色
             return 0x7e62d5;
+          case 6://绿色
+            return 0x67C23A;
         }
       },
 
@@ -100,13 +211,13 @@
           case 0:
             return 20;
           case 1:
-            return 40;
+            return 30;
           case 2:
-            return 60;
+            return 40;
           case 3:
-            return 80;
+            return 50;
           case 4:
-            return 100;
+            return 60;
 
         }
       },
@@ -116,24 +227,20 @@
         return Math.floor(Math.random() * (max - min + 1)) + min;
       },
 
-      createABubble(x, y, radius, color) {
-        let circle = new PIXI.Graphics();
-        circle.beginFill(color);
-        circle.drawCircle(x, y, radius);
-        circle.endFill();
-        circle.x = x;
-        circle.y = y;
-        this.app.stage.addChild(circle);
+      createABubble( x, y, radius, color, vue) {
 
+        let circle = new Phaser.Geom.Circle(x, y, radius);
+        this.graphics = vue.add.graphics({ fillStyle: { color: color } });
+        this.graphics.setAlpha(0.6);
+        this.graphics.fillCircleShape(circle);
 
 
         this.bubbleNum++;
         this.bubbles.push({
           id: this.bubbleNum,
-          color:color,
-          radius:radius,
-          instance:circle,
-          activate:true,
+          color: color,
+          radius: radius,
+          circle: circle,
         })
       }
     }
