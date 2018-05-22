@@ -3,7 +3,7 @@
     <my-header activeIndex="/bubble"></my-header>
     <div id="game"></div>
     <div id="btn-set">
-    <el-button type="primary" v-on:click="restart()" >ReStart</el-button>
+      <el-button type="primary" v-on:click="restart()">ReStart</el-button>
     </div>
   </div>
 </template>
@@ -33,18 +33,20 @@
         bubbleNum: 0,
         windowWidth: 0,
         windowHeight: 0,
+        gameOverBlock: {},
+        gameOverText: {},
         graphics: {},
         timer: {},
         gameScene: {},
-        gameOverScene: {},
-        targetTime:1,
+        targetTime: 5,
         targetColor: 0,
-        targetCircle: {},
+        targetRect: {},
         timedEvent: {},
         myBubble: {
           radius: 0,
           color: 0xffffff,
           pointerCircle: {},
+          instance: {}
         },
       }
     },
@@ -55,24 +57,7 @@
       this.windowHeight = window.innerHeight - 60;
 
 
-      self.gameOverScene =  new Phaser.Class({
-        key: 'gameOver',
-        preload: function () {
-          // let scene = this;
-          // self.preload(scene)
-        },
-        create: function () {
-          let scene = this;
-          self.gameOverCreate(scene)
-        },
-
-        update: function () {
-          // let scene = this;
-          // self.update(scene)
-        }
-      });
-
-      self.gameScene =  new Phaser.Class({
+      self.gameScene = new Phaser.Class({
         key: 'gameStart',
         preload: function () {
           let scene = this;
@@ -90,7 +75,7 @@
       });
 
       let gameConfig = {
-        scene: [self.gameOverScene,self.gameScene],
+        scene: [self.gameScene],
         type: Phaser.AUTO,
         transparent: false,
         backgroundColor: 0xdddddd,
@@ -115,32 +100,26 @@
 
     methods: {
 
-      restart: function(){
+      restart: function () {
         let self = this;
         document.getElementById('btn-set').style.display = 'none';
+        this.gameOverBlock.setVisible(false);
+        this.gameOverText.setText('');
+
+
         this.gameScene.scene.restart();
       },
 
       endGame: function () {
-        
+        this.gameOverBlock.setVisible(true);
+        this.gameOverText.setText('Game Over');
+
         if (document.getElementById('btn-set')) {
           document.getElementById('btn-set').style.display = 'inline-block';
         }
-      },
-
-
-      gameOverCreate: function (vue) {
-        let self = this;
-        this.gameOverScene = vue;
-
-        let rect = new Phaser.Geom.Rectangle(0, 0, this.windowWidth, this.windowHeight);
-        let graphics = vue.add.graphics({ fillStyle: { color: 0xdddddd } });
-        graphics.fillRectShape(rect);
-        let msg = this.gameOverScene.add.text(this.windowWidth/2 - 150, this.windowHeight/2 - 80, 'Game Over',
-          {fontSize: '60px', fontColor: '#ffffff'});
-
 
       },
+
 
       colorIndex: function (color) {
         switch (color) {
@@ -195,21 +174,17 @@
         let y = 300;
         this.myBubble.pointerCircle = new Phaser.Geom.Circle(x, y, radius);
 
-        let myBubble = this.gameScene.impact.add.body(x - radius, y - radius).setBounce(1);
-        myBubble.setBodySize(radius * 2, radius * 2);
+        this.myBubble.instance = this.gameScene.impact.add.body(x - radius, y - radius).setBounce(1);
+        this.myBubble.instance.setBodySize(radius * 2, radius * 2);
 
 
-        myBubble.body.updateCallback = function (body) {
-
+        this.myBubble.instance.body.updateCallback = function (body) {
           self.drawCircle();
-
-
           self.gameScene.input.on('pointermove', function (pointer) {
             body.pos.x = pointer.x - radius;
             body.pos.y = pointer.y - radius;
             self.myBubble.pointerCircle.x = pointer.x;
             self.myBubble.pointerCircle.y = pointer.y;
-
           });
 
 
@@ -232,25 +207,32 @@
 
         vue.impact.world.setBounds();
 
-
         this.createOtherBubble(20);
 
         this.createMyBubble();
 
         this.createTimer();
 
+
+        let rec = new Phaser.Geom.Rectangle(0, 0, this.windowWidth, this.windowHeight);
+        this.gameOverBlock = this.gameScene.add.graphics({fillStyle: {color: 0xdddddd, alpha: 0.7}});
+        this.gameOverBlock.fillRectShape(rec);
+        this.gameOverBlock.setVisible(false);
+
+        this.gameOverText = this.gameScene.add.text(this.windowWidth / 2 - 140, this.windowHeight / 2 - 100, '', {fontSize: '54px'});
+
       },
 
 
       createTimer: function () {
         this.targetColor = this.randomColor();
-        this.targetCircle = new Phaser.Geom.Circle(240, 50, 16);
+        this.targetRect = new Phaser.Geom.Rectangle(230, 40, 20, 20);
 
         this.targetGraphics = this.gameScene.add.graphics({fillStyle: {color: this.targetColor}});
-        this.targetGraphics.fillCircleShape(this.targetCircle);
+        this.targetGraphics.fillRectShape(this.targetRect);
 
-        this.targetCircle.diameter = this.targetCircle.radius;
-        this.timer = this.gameScene.add.text(60, 30, 'Target:', {fontSize: '36px', fontColor: this.targetColor});
+        this.targetRect.diameter = this.targetRect.radius;
+        this.timer = this.gameScene.add.text(60, 30, 'Target:', {fontSize: '36px', fontColor: '#ffffff'});
 
 
         this.timedEvent = this.gameScene.time.addEvent({
@@ -266,12 +248,12 @@
         if (this.timer.text.split('   ')[1] === '0') {
           if (this.myBubble.color === this.targetColor) {
             this.targetColor = this.randomColor();
-            this.targetCircle = new Phaser.Geom.Circle(240, 50, 16);
+            this.targetRect = new Phaser.Geom.Rectangle(230, 40, 20, 20);
 
             this.targetGraphics = this.gameScene.add.graphics({fillStyle: {color: this.targetColor}});
-            this.targetGraphics.fillCircleShape(this.targetCircle);
+            this.targetGraphics.fillRectShape(this.targetRect);
 
-            this.targetCircle.diameter = this.targetCircle.radius;
+            this.targetRect.diameter = this.targetRect.radius;
 
             this.timedEvent = this.gameScene.time.addEvent({
               delay: 1000,
@@ -281,7 +263,6 @@
             });
 
           }
-
           else {
             this.endGame();
 
@@ -299,13 +280,28 @@
 
           colorLock.push(false);
 
-          let vx = self.randomInt(50, 100);
-          let vy = self.randomInt(50, 100);
+          let vx = self.randomInt(80, 200);
+          let vy = self.randomInt(80, 200);
           let radius = self.randomSize();
 
           let x = self.randomInt(radius + 20, self.windowWidth - radius - 20);
           let y = self.randomInt(radius + 20, self.windowHeight - radius - 20);
-          let color = self.randomColor();
+          let color;
+          switch (num) {
+            case 0:
+              color = 0xF56C6C;
+              break;
+            case 1:
+              color = 0xf9fc4e;
+              break;
+            case 2:
+              color = 0x409EFF;
+              break;
+
+            default:
+              color = self.randomColor();
+              break;
+          }
 
           let graphics = self.gameScene.add.graphics();
 
