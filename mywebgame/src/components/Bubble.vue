@@ -2,6 +2,9 @@
   <div class="bubble">
     <my-header activeIndex="/bubble"></my-header>
     <div id="game"></div>
+    <div id="btn-set">
+    <el-button type="primary" v-on:click="restart()" >ReStart</el-button>
+    </div>
   </div>
 </template>
 
@@ -11,10 +14,12 @@
   import * as PIXI from 'pixi.js'
   import * as p2 from 'p2'
   import * as Phaser from 'phaser'
+  import ElButton from "element-ui/packages/button/src/button";
 
 
   export default {
     components: {
+      ElButton,
       MyHeader,
     },
     name: 'Bubble',
@@ -22,12 +27,20 @@
       return {
         gameState: {},
         app: {},
+        targetGraphics: {},
         game: {},
         bubbles: [],
         bubbleNum: 0,
         windowWidth: 0,
         windowHeight: 0,
         graphics: {},
+        timer: {},
+        gameScene: {},
+        gameOverScene: {},
+        targetTime:1,
+        targetColor: 0,
+        targetCircle: {},
+        timedEvent: {},
         myBubble: {
           radius: 0,
           color: 0xffffff,
@@ -37,12 +50,47 @@
     },
 
     mounted() {
+      let self = this;
       this.windowWidth = window.innerWidth;
       this.windowHeight = window.innerHeight - 60;
 
-      let self = this;
 
-      let config = {
+      self.gameOverScene =  new Phaser.Class({
+        key: 'gameOver',
+        preload: function () {
+          // let scene = this;
+          // self.preload(scene)
+        },
+        create: function () {
+          let scene = this;
+          self.gameOverCreate(scene)
+        },
+
+        update: function () {
+          // let scene = this;
+          // self.update(scene)
+        }
+      });
+
+      self.gameScene =  new Phaser.Class({
+        key: 'gameStart',
+        preload: function () {
+          let scene = this;
+          self.preload(scene)
+        },
+        create: function () {
+          let scene = this;
+          self.create(scene)
+        },
+
+        update: function () {
+          let scene = this;
+          self.update(scene)
+        }
+      });
+
+      let gameConfig = {
+        scene: [self.gameOverScene,self.gameScene],
         type: Phaser.AUTO,
         transparent: false,
         backgroundColor: 0xdddddd,
@@ -52,37 +100,47 @@
         physics: {
           default: 'impact',
           impact: {
-            debug: true,
+            debug: false,
             maxVelocity: 500
           }
         },
-        scene: {
-          preload: function () {
-            let scene = this;
-            self.preload(scene)
-          },
-          create: function () {
-            let scene = this;
-            self.create(scene)
-          },
-
-          update: function () {
-            let scene = this;
-            self.update(scene)
-          }
-        }
       };
 
-      config.width = window.innerWidth;
-      config.height = window.innerHeight - 60;
-
-      this.game = new Phaser.Game(config);
-
+      gameConfig.width = self.windowWidth;
+      gameConfig.height = self.windowHeight;
+      self.game = new Phaser.Game(gameConfig);
+      document.getElementById('btn-set').style.display = 'none';
     },
 
 
     methods: {
 
+      restart: function(){
+        let self = this;
+        document.getElementById('btn-set').style.display = 'none';
+        this.gameScene.scene.restart();
+      },
+
+      endGame: function () {
+        
+        if (document.getElementById('btn-set')) {
+          document.getElementById('btn-set').style.display = 'inline-block';
+        }
+      },
+
+
+      gameOverCreate: function (vue) {
+        let self = this;
+        this.gameOverScene = vue;
+
+        let rect = new Phaser.Geom.Rectangle(0, 0, this.windowWidth, this.windowHeight);
+        let graphics = vue.add.graphics({ fillStyle: { color: 0xdddddd } });
+        graphics.fillRectShape(rect);
+        let msg = this.gameOverScene.add.text(this.windowWidth/2 - 150, this.windowHeight/2 - 80, 'Game Over',
+          {fontSize: '60px', fontColor: '#ffffff'});
+
+
+      },
 
       colorIndex: function (color) {
         switch (color) {
@@ -123,30 +181,30 @@
 
       resizeCanvas: function () {
         let canvas = document.getElementsByTagName('canvas')[0];
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight - 60;
+        canvas.width = this.windowWidth;
+        canvas.height = this.windowHeight - 60;
       },
 
 
-      createMyBubble: function (vue) {
+      createMyBubble: function () {
         let self = this;
-        self.graphics = vue.add.graphics();
+        self.graphics = this.gameScene.add.graphics();
 
         let radius = 20;
         let x = 400;
         let y = 300;
         this.myBubble.pointerCircle = new Phaser.Geom.Circle(x, y, radius);
 
-        let myBubble = vue.impact.add.body(x - radius, y - radius).setBounce(1);
+        let myBubble = this.gameScene.impact.add.body(x - radius, y - radius).setBounce(1);
         myBubble.setBodySize(radius * 2, radius * 2);
 
 
         myBubble.body.updateCallback = function (body) {
 
-          self.drawCircle(body.pos.x, body.pos.y, radius, self.myBubble.color);
+          self.drawCircle();
 
 
-          vue.input.on('pointermove', function (pointer) {
+          self.gameScene.input.on('pointermove', function (pointer) {
             body.pos.x = pointer.x - radius;
             body.pos.y = pointer.y - radius;
             self.myBubble.pointerCircle.x = pointer.x;
@@ -158,34 +216,86 @@
         };
       },
 
-      drawCircle: function (x, y, radius, color) {
+      drawCircle: function () {
         this.graphics.clear();
         this.graphics.lineStyle(4, this.myBubble.color);
         this.graphics.strokeCircleShape(this.myBubble.pointerCircle);
 
       },
 
-      // drawBuble: function (graphics, x, y, radius, color) {
-      //
-      //   graphics.fillStyle(color, 0.6);
-      //   let circle = new Phaser.Geom.Circle(x, y, radius);
-      //   graphics.fillCircleShape(circle);
-      //
-      // },
-
       create: function (vue) {
         let self = this;
 
-        //  Calling this with no arguments will set the bounds to match the game config width/height
+        this.gameScene = vue;
+
+        //  Calling this with no arguments will set the bounds to match the game gameConfig width/height
 
         vue.impact.world.setBounds();
 
-        vue.input.on('gameobjectdown', function (pointer) {
 
+        this.createOtherBubble(20);
+
+        this.createMyBubble();
+
+        this.createTimer();
+
+      },
+
+
+      createTimer: function () {
+        this.targetColor = this.randomColor();
+        this.targetCircle = new Phaser.Geom.Circle(240, 50, 16);
+
+        this.targetGraphics = this.gameScene.add.graphics({fillStyle: {color: this.targetColor}});
+        this.targetGraphics.fillCircleShape(this.targetCircle);
+
+        this.targetCircle.diameter = this.targetCircle.radius;
+        this.timer = this.gameScene.add.text(60, 30, 'Target:', {fontSize: '36px', fontColor: this.targetColor});
+
+
+        this.timedEvent = this.gameScene.time.addEvent({
+          delay: 1000,
+          callback: this.checkBubbleColor,
+          callbackScope: this.gameScene,
+          repeat: this.targetTime
         });
+
+      },
+
+      checkBubbleColor: function () {
+        if (this.timer.text.split('   ')[1] === '0') {
+          if (this.myBubble.color === this.targetColor) {
+            this.targetColor = this.randomColor();
+            this.targetCircle = new Phaser.Geom.Circle(240, 50, 16);
+
+            this.targetGraphics = this.gameScene.add.graphics({fillStyle: {color: this.targetColor}});
+            this.targetGraphics.fillCircleShape(this.targetCircle);
+
+            this.targetCircle.diameter = this.targetCircle.radius;
+
+            this.timedEvent = this.gameScene.time.addEvent({
+              delay: 1000,
+              callback: this.checkBubbleColor,
+              callbackScope: this.gameScene,
+              repeat: this.targetTime
+            });
+
+          }
+
+          else {
+            this.endGame();
+
+          }
+        }
+      },
+
+
+      createOtherBubble: function (num) {
+
+        let self = this;
         let colorLock = [];
 
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < num; i++) {
 
           colorLock.push(false);
 
@@ -197,13 +307,14 @@
           let y = self.randomInt(radius + 20, self.windowHeight - radius - 20);
           let color = self.randomColor();
 
+          let graphics = self.gameScene.add.graphics();
 
           //  Create a Graphics object
-          let graphics = vue.add.graphics();
-          let bubble = vue.impact.add.body(x, y).setActiveCollision().setVelocity(vx, vy).setBounce(1);
+          let bubble = this.gameScene.impact.add.body(x, y).setActiveCollision().setVelocity(vx, vy).setBounce(1);
           bubble.setBodySize(radius * 2, radius * 2);
           bubble.body.id = i;
           bubble.body.updateCallback = function (body) {
+
             graphics.clear();
 
             graphics.fillStyle(color, 0.6);
@@ -211,7 +322,7 @@
             graphics.fillCircleShape(circle);
 
             self.graphics.clear();
-            self.graphics = vue.add.graphics();
+            self.graphics = self.gameScene.add.graphics();
 
             if (Phaser.Geom.Intersects.CircleToCircle(circle, self.myBubble.pointerCircle)) {
               if (!colorLock[body.id]) {
@@ -232,24 +343,12 @@
           };
 
         }
-
-
-        this.createMyBubble(vue);
-
       },
 
       update: function (vue) {
-
-
+        this.timer.setText('Target:   ' + this.timedEvent.repeatCount);
       },
 
-      createARandomBubble(vue) {
-        let size = this.randomSize();
-        let x = this.randomInt(size + 20, this.windowWidth - size - 20);
-        let y = this.randomInt(size + 20, this.windowHeight - size - 20);
-
-        this.createABubble(x, y, size, this.randomColor(), vue);
-      },
 
       randomColor: function () {
         let index = this.randomInt(0, 6);
@@ -302,5 +401,12 @@
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 
-
+  #btn-set {
+    display: inline-block;
+    position: absolute;
+    text-align: center;
+    vertical-align: middle;
+    width: 100%;
+    top: 420px;
+  }
 </style>
