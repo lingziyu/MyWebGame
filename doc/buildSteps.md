@@ -39,3 +39,17 @@ npm install --save p2
 npm install --save phaser  
 ```
 
+
+
+### Install Three.js
+
+```
+npm install three
+```
+
+### Install Physijs
+
+```
+ npm install --save physijs-webpack 
+```
+
