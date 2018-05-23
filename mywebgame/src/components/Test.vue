@@ -1,5 +1,5 @@
 <template>
-  <div class="PIXI">
+  <div class="Test">
     <my-header activeIndex="/test"></my-header>
     <div id="btn-set">
       <el-button type="primary" v-on:click="startTest()">Test Again</el-button>

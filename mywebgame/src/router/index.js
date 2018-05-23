@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import HelloWorld from '@/components/HelloWorld'
 import Test from  '@/components/Test'
 import Bubble from '@/components/Bubble'
+import Cube from '@/components/Cube'
 import * as PIXI from 'pixi.js'
 
 PIXI.loader
@@ -26,6 +27,10 @@ export default new Router({
       path: '/bubble',
       name: 'Bubble',
       component: Bubble
+    },{
+      path: '/cube',
+      name: 'Cube',
+      component: Cube
     }
   ]
 })
