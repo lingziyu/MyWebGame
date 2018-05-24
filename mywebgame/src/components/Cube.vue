@@ -4,10 +4,10 @@
 
     <div id="blocker">
       <div id="instructions">
-        <span style="font-size:40px">点击屏幕开始</span>
+        <span style="font-size:40px">Click to Start</span>
         <br/>
         <br/>
-        (W, A, S, D = 移动, SPACE = 跳跃, MOUSE = 移动视角)
+        W, A, S, D = 移动, SPACE = 跳跃, MOUSE = 视角
       </div>
     </div>
 
@@ -40,23 +40,24 @@
         mesh: {},
         height: 300,
         width: 400,
-        controls: {},
         moveForward: false,
         moveBackward: false,
         moveLeft: false,
         moveRight: false,
         canJump: false,
-        prevTime:{},
-        velocity:{},
-        direction:{},
-        vertex:{},
-        color:{},
-        objects:[],
-        raycaster:{},
-        renderer:{},
-        controls:{},
-        PointerLockControls:{},
-        controlsEnabled:false
+        prevTime: {},
+        velocity: {},
+        direction: {},
+        vertex: {},
+        color: {},
+        floor:{},
+        objects: [],
+        raycaster: {},
+        controls: {},
+        PointerLockControls: {},
+        controlsEnabled: false,
+        cube:{}
+
       }
     },
 
@@ -69,12 +70,20 @@
 
         camera.rotation.set(0, 0, 0);
 
-        let pitchObject = new THREE.Object3D();
+        let pitchObject = new THREE.Object3D({});
         pitchObject.add(camera);
 
         let yawObject = new THREE.Object3D();
         yawObject.position.y = 10;
         yawObject.add(pitchObject);
+
+        this.geometry = new THREE.BoxGeometry(2, 2, 2);
+        this.material = new THREE.MeshLambertMaterial({color: 0xff0000, emissive: 0xff0000});
+        this.mesh = new THREE.Mesh(this.geometry, this.material);
+        yawObject.add(this.mesh);
+        this.mesh.position.set(0, -3, -3);
+
+
 
         let PI_2 = Math.PI / 2;
 
@@ -128,6 +137,7 @@
         }();
 
       };
+
 
       let blocker = document.getElementById('blocker');
       let instructions = document.getElementById('instructions');
@@ -190,7 +200,6 @@
       }
 
 
-
       this.prevTime = performance.now();
       this.velocity = new THREE.Vector3();
       this.direction = new THREE.Vector3();
@@ -206,13 +215,13 @@
       init: function () {
         let self = this;
 
-        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
+        this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
 
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0xffffff);
-        this.scene.fog = new THREE.Fog(0xffffff, 0, 750);
+        this.scene.background = new THREE.Color(0xdddddd);
+        this.scene.fog = new THREE.Fog(0xdddddd, 0, 750);
 
-        let light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.75);
+        let light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.5);
         light.position.set(0.5, 1, 0.75);
         this.scene.add(light);
 
@@ -236,16 +245,18 @@
             case 40: // down
             case 83: // s
               self.moveBackward = true;
+
               break;
 
             case 39: // right
             case 68: // d
               self.moveRight = true;
+
               break;
 
             case 32: // space
               if (self.canJump === true)
-                self.velocity.y += 350;
+                self.velocity.y += 300;
               self.canJump = false;
               break;
 
@@ -284,6 +295,9 @@
         document.addEventListener('keydown', onKeyDown, false);
         document.addEventListener('keyup', onKeyUp, false);
 
+
+
+
         this.raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, -1, 0), 0, 10);
 
         // floor
@@ -314,21 +328,22 @@
 
         for (let i = 0; i < count; i++) {
 
-          self.color.setHSL(Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
+          self.color = new THREE.Color(0xff0000);
           colors.push(self.color.r, self.color.g, self.color.b);
 
         }
 
         floorGeometry.addAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
 
-        let floorMaterial = new THREE.MeshBasicMaterial({vertexColors: THREE.VertexColors});
+        let floorMaterial = new THREE.MeshLambertMaterial({color: 0xdddddd});
 
-        let floor = new THREE.Mesh(floorGeometry, floorMaterial);
-        this.scene.add(floor);
+        this.floor = new THREE.Mesh(floorGeometry, floorMaterial);
+        this.scene.add(this.floor);
 
         // objects
 
-        let boxGeometry = new THREE.BoxBufferGeometry(20, 20, 20);
+        let size = 10;
+        let boxGeometry = new THREE.BoxBufferGeometry(size, size, size);
         boxGeometry = boxGeometry.toNonIndexed(); // ensure each face has unique vertices
 
         count = boxGeometry.attributes.position.count;
@@ -343,26 +358,26 @@
 
         boxGeometry.addAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
 
-        for (let i = 0; i < 500; i++) {
+        let xSet = [0,0,10,10,10,20,20,40,40,50,50,50,70,70,-30,-30,-40,-40,-50,-60,-70];
+        let ySet = [10,20,20,20,30,30,30,10,20,20,20,30,30,30,10,20,20,20,30,30];
+        let zSet = [-30,-40,-40,-50,-50,-60,-70,-70,-80,-80,-90,-90,-100,-110,-70,-80,-80,-90,-90,-100];
 
-          let boxMaterial = new THREE.MeshPhongMaterial({
-            specular: 0xffffff,
-            flatShading: true,
-            vertexColors: THREE.VertexColors
-          });
+
+        for (let i = 0; i < 20; i++) {
+
+          let color = this.randomColor();
+          let boxMaterial = new THREE.MeshLambertMaterial({color: color, emissive: this.randomColorPair(color)});
           boxMaterial.color.setHSL(Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75);
 
           let box = new THREE.Mesh(boxGeometry, boxMaterial);
-          box.position.x = Math.floor(Math.random() * 20 - 10) * 20;
-          box.position.y = Math.floor(Math.random() * 20) * 20 + 10;
-          box.position.z = Math.floor(Math.random() * 20 - 10) * 20;
+          box.position.x = xSet[i];
+          box.position.y = ySet[i];
+          box.position.z = zSet[i];
 
           this.scene.add(box);
           self.objects.push(box);
 
         }
-
-        //
 
         self.renderer = new THREE.WebGLRenderer({antialias: true});
         self.renderer.setPixelRatio(window.devicePixelRatio);
@@ -380,7 +395,7 @@
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
 
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
 
       },
 
@@ -440,12 +455,51 @@
         }
 
         this.renderer.render(this.scene, this.camera);
-      }
+      },
+
+      randomInt: function (min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      },
 
 
+      randomColor: function () {
+        let index = this.randomInt(0, 6);
+        switch (index) {
+          case 0:
+            return 0xffffff;
+          case 1://红色
+            return 0xF56C6C;
+          case 2://黄色
+            return 0xf9fc4e;
+          case 3://蓝色
+            return 0x409EFF;
+          case 4://橙色
+            return 0xE6A23C;
+          case 5://紫色
+            return 0x7e62d5;
+          case 6://绿色
+            return 0x67C23A;
+        }
+      },
 
-
-
+      randomColorPair: function (color) {
+        switch (color) {
+          case 0xffffff:
+            return 0xcccccc;
+          case 0xF56C6C://红色
+            return 0xe03e3e;
+          case 0xf9fc4e://黄色
+            return 0xe2e534;
+          case 0x409EFF://蓝色
+            return 0x1774d1;
+          case 0xE6A23C://橙色
+            return 0xdb9129;
+          case 0x7e62d5://紫色
+            return 0x6648c9;
+          case 0x67C23A://绿色
+            return 0x4ba51d;
+        }
+      },
 
 
       // init: function () {
@@ -486,49 +540,6 @@
       // },
       //
       //
-      // randomInt: function (min, max) {
-      //   return Math.floor(Math.random() * (max - min + 1)) + min;
-      // },
-      //
-      //
-      // randomColor: function () {
-      //   let index = this.randomInt(0, 6);
-      //   switch (index) {
-      //     case 0:
-      //       return 0xffffff;
-      //     case 1://红色
-      //       return 0xF56C6C;
-      //     case 2://黄色
-      //       return 0xf9fc4e;
-      //     case 3://蓝色
-      //       return 0x409EFF;
-      //     case 4://橙色
-      //       return 0xE6A23C;
-      //     case 5://紫色
-      //       return 0x7e62d5;
-      //     case 6://绿色
-      //       return 0x67C23A;
-      //   }
-      // },
-      //
-      // randomColorPair: function (color) {
-      //   switch (color) {
-      //     case 0xffffff:
-      //       return 0xcccccc;
-      //     case 0xF56C6C://红色
-      //       return 0xe03e3e;
-      //     case 0xf9fc4e://黄色
-      //       return 0xe2e534;
-      //     case 0x409EFF://蓝色
-      //       return 0x1774d1;
-      //     case 0xE6A23C://橙色
-      //       return 0xdb9129;
-      //     case 0x7e62d5://紫色
-      //       return 0x6648c9;
-      //     case 0x67C23A://绿色
-      //       return 0x4ba51d;
-      //   }
-      // },
       //
       //
       // initMyBubble: function (x, y, z, color) {
