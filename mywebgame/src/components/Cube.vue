@@ -5,8 +5,6 @@
       <ul>
         <!--<li><div id="dbtitle">Triple Three</div></li>-->
         <li id="btnstart" class="btn" onClick="location.reload()">New Game</li>
-        <li id="btnhelp" class="btn" onClick="helpClick()">Help</li>
-        <li id="btnsound" class="btn" onClick="switchSound()">Sound Off</li>
         <li>&nbsp;&nbsp;</li>
         <li id="dbscorelb">Score:</li>
         <li id="dbscorev"></li>

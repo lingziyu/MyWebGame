@@ -1,11 +1,3 @@
-/*
- * Triple Game Logic
- *
- * Version 1.4
- * Copyright (c) 2015-2017 by Willi Commer (WCS)
- * Licence GPL 3.0
- *
- */
 
 
 var TRIPLE_GAME = TRIPLE_GAME || ( function () {

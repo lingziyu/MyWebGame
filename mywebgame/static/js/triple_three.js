@@ -1,15 +1,4 @@
-/*
- * Triple Three Game
- *
- * Version 1.6
- * Copyright (c) 2015-2017 by Willi Commer (WCS)
- * Licence GPL 3.0
- *
- */
 
-/* global THREE, THREEx, TWEEN */
-
-// global variables
 import THREE from './libs/three.js/three'
 
 var TRIPLE_GAME = require('./triple_game');
@@ -89,13 +78,13 @@ export function init()
 
     // LIGHT
 
-    var light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(-1000, 1000, 1000);
-    scene.add(light);
+    var light1 = new THREE.DirectionalLight(0xffffff, 1);
+    light1.position.set(-1000, 1000, 1000);
+    scene.add(light1);
 
-    var light = new THREE.DirectionalLight(0xffffff, 0.6);
-    light.position.set(1000, 1000, -1000);
-    scene.add(light);
+    var light2 = new THREE.DirectionalLight(0xffffff, 0.6);
+    light2.position.set(1000, 1000, -1000);
+    scene.add(light2);
 
     var hemiLight = new THREE.HemisphereLight( 0xffffff, 0xffffff, 0.6 );
     hemiLight.color.setHSL( 0.6, 1, 0.6 );
@@ -358,15 +347,6 @@ function onDocumentClick(event)
 };
 
 
-
-function helpClick()
-{
-  var el =  document.getElementById('helptext');
-  if(el.className === "")
-    el.className = "hidden";
-  else
-    el.className = "";
-};
 
 function switchSound()
 {
