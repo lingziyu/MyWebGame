@@ -1,10 +1,27 @@
 <template>
   <div class="cube">
     <my-header activeIndex="/cube"></my-header>
-    <div id="my-canvas"></div>
-    <div id="btn-set">
-      <el-button type="primary">Test Again</el-button>
+    <div id="dashboard" style="position: absolute; left:0px; top:0px; zindex:10; width:100%">
+      <ul>
+        <!--<li><div id="dbtitle">Triple Three</div></li>-->
+        <li id="btnstart" class="btn" onClick="location.reload()">New Game</li>
+        <li id="btnhelp" class="btn" onClick="helpClick()">Help</li>
+        <li id="btnsound" class="btn" onClick="switchSound()">Sound Off</li>
+        <li>&nbsp;&nbsp;</li>
+        <li id="dbscorelb">Score:</li>
+        <li id="dbscorev"></li>
+      </ul>
+      <div id="dblog"></div>
+      <div id="helptext" class="hidden">
+        <p>The lower separate field holds the next stone.</p>
+        <p>Click a free place in the board to make a move.</p>
+        <p>Try to collect stones with same height and same color next to each other.</p>
+        <p>3 stones with the same height will grow to the next level.</p>
+        <p>Use the upper separate field as reserve.</p>
+        <p><div id="btnhelpclose" class="btn" style="width:60px;" onClick="helpClick()">Close</div></p>
+      </div>
     </div>
+
   </div>
 </template>
 
@@ -12,6 +29,13 @@
   import MyHeader from './MyHeader'
   import ElButton from "element-ui/packages/button/src/button";
   import * as THREE from 'three';
+
+  require('../../static/css/base.css');
+  require('../../static/js/libs/three.js/three.js');
+  require('../../static/js/libs/three.js/Projector.js');
+  require('../../static/js/libs/three.js/OrbitControls.js');
+  require('../../static/js/libs/Tween.js');
+  import { init, animate } from '../../static/js/triple_three.js';
 
   export default {
     components: {
@@ -21,54 +45,21 @@
     name: 'Cube',
     data() {
       return {
-
+        scene: {},
+        camera: {},
+        renderer: {}
       }
     },
 
     mounted() {
-      var scene = new THREE.Scene();
-      var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
-
-      var renderer = new THREE.WebGLRenderer();
-      renderer.setSize( window.innerWidth, window.innerHeight );
-      document.getElementById('my-canvas').appendChild( renderer.domElement );
-
-      var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-      var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-      var cube = new THREE.Mesh( geometry, material );
-      scene.add( cube );
-
-      camera.position.z = 5;
-
-      var render = function () {
-        requestAnimationFrame( render );
-
-        cube.rotation.x += 0.1;
-        cube.rotation.y += 0.1;
-
-        renderer.render(scene, camera);
-      };
-
-      render();
+      init();
+      animate();
     },
-    methods: {
-
-    }
+    methods: {}
   }
 </script>
 
 
 <style scoped>
-  #btn-set {
-    display: none;
-    position: absolute;
-    text-align: center;
-    vertical-align: middle;
-    width: 100%;
-    top: 420px;
-  }
 
-  canvas {
-    width: 100%; height: 100%
-  }
 </style>
