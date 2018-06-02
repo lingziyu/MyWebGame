@@ -1,0 +1,54 @@
+body
+{
+	font-family: Monospace;
+	font-weight: bold;
+	background-color: #eeeeee;
+	margin: 0px;
+	overflow: hidden;
+}
+
+#dashboard
+{
+    text-shadow: 2px 2px 4px #400000;
+    margin-top: 60px;
+}
+
+#dbtitle
+{
+    font-size: xx-large;
+    text-align: center;
+}
+
+#helptext
+{
+   position: relative;
+   top: 20px;
+   left: 40px;
+}
+
+.btn {
+  background: #3498db;
+  background-image: -webkit-linear-gradient(top, #3498db, #2980b9);
+  background-image: linear-gradient(to bottom, #3498db, #2980b9);
+  border-radius: 28px;
+  padding: 10px 20px 10px 20px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #3cb0fd;
+  background-image: -webkit-linear-gradient(top, #3cb0fd, #3498db);
+  background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
+}
+
+.under {
+    text-decoration: underline;
+}
+
+div.hidden {
+    display: none;
+}
+
+li {
+    display: inline;
+}
