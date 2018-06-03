@@ -9,10 +9,18 @@ body
 
 #dashboard
 {
-    text-shadow: 2px 2px 4px #400000;
     margin-top: 60px;
 }
 
+#dblog{
+  text-align: center;
+  font-size: 50pt;
+  color: #3f3f3f;
+  margin-top: 180px;
+}
+#btnstart{
+  color: white;
+}
 #dbtitle
 {
     font-size: xx-large;
@@ -27,23 +35,16 @@ body
 }
 
 .btn {
-  background: #3498db;
-  background-image: -webkit-linear-gradient(top, #3498db, #2980b9);
-  background-image: linear-gradient(to bottom, #3498db, #2980b9);
-  border-radius: 28px;
-  padding: 10px 20px 10px 20px;
+  background: #2a8cff;
+  border-radius: 5px;
+  padding: 10px 30px 10px 30px;
   cursor: pointer;
 }
 
 .btn:hover {
-  background: #3cb0fd;
-  background-image: -webkit-linear-gradient(top, #3cb0fd, #3498db);
-  background-image: linear-gradient(to bottom, #3cb0fd, #3498db);
+  background: #409EFF;
 }
 
-.under {
-    text-decoration: underline;
-}
 
 div.hidden {
     display: none;

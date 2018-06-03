@@ -95,7 +95,7 @@ export function init()
 
     // SKYBOX/FOG
     var skyBoxGeometry = new THREE.BoxGeometry(10000, 10000, 10000);
-    var skyBoxMaterial = new THREE.MeshBasicMaterial({color: 0x9999ff, side: THREE.BackSide});
+    var skyBoxMaterial = new THREE.MeshBasicMaterial({color: 0xeeeeee, side: THREE.BackSide});
     var skyBox = new THREE.Mesh(skyBoxGeometry, skyBoxMaterial);
     scene.add(skyBox);
 
@@ -114,8 +114,16 @@ export function init()
 function create_place( x, y, typ )
 {
 
-    var Material = new THREE.MeshPhongMaterial( { color: 0x00ff00, side: THREE.DoubleSide } );
-    var Material = new THREE.MeshBasicMaterial( { color: 0x00ffff, side: THREE.DoubleSide } );
+ var color = 0xffffff;
+ if(x === -2){
+      if(y===2){
+        color = 0xdddddd;
+      }
+      else {
+        color = 0xcccccc;
+      }
+ }
+  var Material = new THREE.MeshBasicMaterial( { color: color, side: THREE.DoubleSide } );
     var cubeGeometry = new THREE.BoxGeometry(48, 1, 48);
     var cube = new THREE.Mesh(cubeGeometry, Material);
     cube.position.set(x * PLACE_WIDTH + PLACE_X, PLACE_Y, y * PLACE_WIDTH + PLACE_Z);
@@ -137,7 +145,7 @@ function create_places()
             scene.add(obj);
     }
 
-    var obj = create_place(-2, 4, 1);
+    var obj = create_place(-2, 3, 1);
     obj.name = 'nextfigure_place';
     scene.add(obj);
 
@@ -161,9 +169,9 @@ function create_figure( x, y, fig )
 {
   var color;
   if(fig > 99)
-    color = 0xff00ff;
+    color = 0x67C23A;
   else
-    color = 0x0000ff
+    color = 0xE6A23C;
 
   var Material = new THREE.MeshPhongMaterial( { color: color, side: THREE.DoubleSide } );
     var cubeGeometry = new THREE.BoxGeometry(FIGURE_WIDTH, FIGURE_HEIGHT, FIGURE_WIDTH);
@@ -220,7 +228,7 @@ function update_board() {
 function moveFigureToPlace( fig, place )
 {
     var tween = new TWEEN.Tween( fig.position )
-        .to({x: place.position.x, z: place.position.z}, 1000)
+        .to({x: place.position.x, z: place.position.z}, 2000)
         .easing(TWEEN.Easing.Elastic.InOut)
         .onComplete(update_board)
         .start();
@@ -229,7 +237,7 @@ function moveFigureToPlace( fig, place )
 
 function start_new_game() {
     triple_game.new_game();
-    nextobj = create_figure( -2, 4, triple_game.next_figure() );
+    nextobj = create_figure( -2, 3, triple_game.next_figure() );
     reserveobj = null;
     update_board();
 }
@@ -253,7 +261,7 @@ function user_move( place ) {
     nextobj.object_info.y = y;
     nextobj.name = 'figure_'+x+'_'+y;
     moveFigureToPlace( nextobj, place );
-    nextobj = create_figure( -2, 4, triple_game.next_figure() );
+    nextobj = create_figure( -2, 3, triple_game.next_figure() );
 }
 
 
@@ -270,7 +278,7 @@ function swap_reserve() {
     } else {
       moveFigureToPlace( nextobj, place_r );
       reserveobj = nextobj;
-      nextobj = create_figure( -2, 4, triple_game.reserve( true ) );
+      nextobj = create_figure( -2, 3, triple_game.reserve( true ) );
     }
     set_figure_place(nextobj, place_n);
     set_figure_place(reserveobj, place_r);
@@ -308,19 +316,6 @@ function getClickedObject(event)
 function onDocumentClick(event)
 {
     var obj = getClickedObject(event);
-    if(debugmode) {
-        if (obj && obj.name) {
-            dblog.innerHTML =
-            obj.object_info.type + ' ' + obj.object_info.x + ',' + obj.object_info.y
-            + ' ' + obj.position.x
-            + ',' + obj.position.y
-            + ',' + obj.position.z;
-            ;
-        } else {
-            dblog.innerHTML = '';
-            update_board();
-        }
-    }
 
     if( obj && obj.object_info ) {
 
@@ -345,18 +340,6 @@ function onDocumentClick(event)
     }
 
 };
-
-
-
-function switchSound()
-{
-    var el =  document.getElementById('btnsound');
-    sound_on = ! sound_on;
-    el.innerHTML = sound_on ? "Sound Off" : "Sound On";
-}
-
-
-
 
 
 

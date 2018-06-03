@@ -4,9 +4,9 @@
     <div id="dashboard" style="position: absolute; left:0px; top:0px; zindex:10; width:100%">
       <ul>
         <!--<li><div id="dbtitle">Triple Three</div></li>-->
-        <li id="btnstart" class="btn" onClick="location.reload()">New Game</li>
+        <li id="btnstart" class="btn" onClick="location.reload()">重开一局</li>
         <li>&nbsp;&nbsp;</li>
-        <li id="dbscorelb">Score:</li>
+        <li id="dbscorelb">分数:</li>
         <li id="dbscorev"></li>
       </ul>
       <div id="dblog"></div>
