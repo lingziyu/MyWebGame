@@ -184,7 +184,7 @@ function update_board() {
 
 function move_cube_to_seat(mygraphics, seat) {
   var tween = new TWEEN.Tween(mygraphics.position)
-    .to({x: seat.position.x, z: seat.position.z}, 2000)
+    .to({x: seat.position.x, z: seat.position.z}, 1000)
     .easing(TWEEN.Easing.Elastic.InOut)
     .onComplete(update_board)
     .start();

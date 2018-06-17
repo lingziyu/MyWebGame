@@ -85,7 +85,7 @@ var CUBEGAME = CUBEGAME || (function () {
       }
       while (is_legal(temp.x, temp.y)) {
         if (object === pos[temp.y][temp.x]) {
-          ral_x.push([
+          ral_y.push([
             temp.x,
             temp.y
           ])
