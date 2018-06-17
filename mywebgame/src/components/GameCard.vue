@@ -20,10 +20,10 @@
       return {
         height:"",
         items:[
-          "A Color Game",
-          "Bubble Change",
-          "Test Color Sensitivity",
-          "More Game"
+          "A Colorful Set",
+          "Test Game",
+          "Bubble Game",
+          "Cube Game"
         ]
       }
     }

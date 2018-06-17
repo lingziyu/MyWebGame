@@ -3,12 +3,13 @@
 ### Installation
 
 ```
+cd mywebgame
 npm install
 ```
 
-### Build
+### Run
 
 ```
-npm run build
+npm run dev
 ```
 

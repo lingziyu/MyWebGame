@@ -3,8 +3,10 @@
     <my-header activeIndex="/"></my-header>
     <game-card></game-card>
     <div class="btn-set">
-      <el-button round type="primary" v-on:click="startGame()">Bubble Game</el-button>
       <el-button round v-on:click="testGame()">Test Game</el-button>
+      <el-button round type="primary" v-on:click="startGame()">Bubble Game</el-button>
+      <el-button round type="primary" v-on:click="startCube()">Cube Game</el-button>
+
     </div>
   </div>
 </template>
@@ -28,6 +30,9 @@ export default {
   methods:{
     startGame:function () {
       this.$router.push({name: 'Bubble'});
+    },
+    startCube:function () {
+      this.$router.push({name: 'Cube'});
     },
 
     testGame:function () {

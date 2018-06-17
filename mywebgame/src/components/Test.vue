@@ -21,7 +21,7 @@
     data() {
       return {
         winDifficult: 15,
-        backgroundColor: 0xffffff,
+        backgroundColor: 0xeeeeee,
         app: {},
         title: {},
         gameScene: {},

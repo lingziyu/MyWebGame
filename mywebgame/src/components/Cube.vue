@@ -1,23 +1,14 @@
 <template>
   <div class="cube">
     <my-header activeIndex="/cube"></my-header>
-    <div id="dashboard" style="position: absolute; left:0px; top:0px; zindex:10; width:100%">
+    <div style="margin-top: 60px;position: absolute; left:0px; top:0px; zindex:10; width:100%">
       <ul>
         <!--<li><div id="dbtitle">Triple Three</div></li>-->
         <li id="btnstart" class="btn" onClick="location.reload()">重开一局</li>
-        <li>&nbsp;&nbsp;</li>
         <li id="dbscorelb">分数:</li>
         <li id="dbscorev"></li>
       </ul>
       <div id="dblog"></div>
-      <div id="helptext" class="hidden">
-        <p>The lower separate field holds the next stone.</p>
-        <p>Click a free place in the board to make a move.</p>
-        <p>Try to collect stones with same height and same color next to each other.</p>
-        <p>3 stones with the same height will grow to the next level.</p>
-        <p>Use the upper separate field as reserve.</p>
-        <p><div id="btnhelpclose" class="btn" style="width:60px;" onClick="helpClick()">Close</div></p>
-      </div>
     </div>
 
   </div>
@@ -32,8 +23,7 @@
   require('../../static/js/libs/three.js/three.js');
   require('../../static/js/libs/three.js/Projector.js');
   require('../../static/js/libs/three.js/OrbitControls.js');
-  require('../../static/js/libs/Tween.js');
-  import { init, animate } from '../../static/js/triple_three.js';
+  import { create, gameloop } from '../../static/js/library.js';
 
   export default {
     components: {
@@ -41,17 +31,14 @@
       MyHeader
     },
     name: 'Cube',
-    data() {
-      return {
-        scene: {},
-        camera: {},
-        renderer: {}
-      }
+    beforeDestroy(){
+      let canvas = document.getElementsByTagName('canvas')[0];
+      document.body.removeChild(canvas)
     },
-
     mounted() {
-      init();
-      animate();
+
+      create();
+      gameloop();
     },
     methods: {}
   }

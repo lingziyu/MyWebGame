@@ -1,16 +1,12 @@
 body
 {
-	font-family: Monospace;
+  font-family: Monospace, sans-serif;
 	font-weight: bold;
 	background-color: #eeeeee;
-	margin: 0px;
+	margin: 0;
 	overflow: hidden;
 }
 
-#dashboard
-{
-    margin-top: 60px;
-}
 
 #dblog{
   text-align: center;

@@ -51,6 +51,14 @@
       }
     },
 
+    beforeDestroy() {
+      let canvas = document.getElementsByTagName('canvas')[0];
+      document.body.removeChild(canvas)
+      if (this.timer) {
+        clearTimeout(this.timer)
+        this.timer = null
+      }
+    },
     mounted() {
       let self = this;
       this.windowWidth = window.innerWidth;
@@ -95,6 +103,7 @@
       gameConfig.height = self.windowHeight;
       self.game = new Phaser.Game(gameConfig);
       document.getElementById('btn-set').style.display = 'none';
+
     },
 
 
@@ -213,13 +222,13 @@
 
         this.createTimer();
 
-
         let rec = new Phaser.Geom.Rectangle(0, 0, this.windowWidth, this.windowHeight);
         this.gameOverBlock = this.gameScene.add.graphics({fillStyle: {color: 0xdddddd, alpha: 0.7}});
         this.gameOverBlock.fillRectShape(rec);
         this.gameOverBlock.setVisible(false);
 
         this.gameOverText = this.gameScene.add.text(this.windowWidth / 2 - 140, this.windowHeight / 2 - 100, '', {fontSize: '54px'});
+
 
       },
 
@@ -245,6 +254,8 @@
       },
 
       checkBubbleColor: function () {
+        if(!this.timer)
+          return
         if (this.timer.text.split('   ')[1] === '0') {
           if (this.myBubble.color === this.targetColor) {
             this.targetColor = this.randomColor();
@@ -342,7 +353,8 @@
       },
 
       update: function (vue) {
-        this.timer.setText('Target:   ' + this.timedEvent.repeatCount);
+        if (this.timer)
+          this.timer.setText('Target:   ' + this.timedEvent.repeatCount);
       },
 
 
