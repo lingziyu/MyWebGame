@@ -173,9 +173,19 @@ function update_board() {
       }
     }
   }
-  document.getElementById('dbscorev').innerHTML = cube_game.total_num();
-  if (cube_game.game_over())
+  let result = cube_game.total_num()
+  document.getElementById('dbscorev').innerHTML = result
+  if (cube_game.game_over()) {
     document.getElementById('dblog').innerHTML = 'GAME OVER';
+    if(localStorage.cube){
+      let a = JSON.parse(localStorage.cube);
+      a.push(result);
+      localStorage.cube =  JSON.stringify(a)
+    }else {
+      let array = [result[0]]
+      localStorage.cube =  JSON.stringify(array)
+    }
+  }
   else
     document.getElementById('dblog').innerHTML = '';
 

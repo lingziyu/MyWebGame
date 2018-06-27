@@ -6,7 +6,6 @@
         <h3>{{ item }}</h3>
       </el-carousel-item>
     </el-carousel>
-
   </div>
 </template>
 

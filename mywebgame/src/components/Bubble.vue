@@ -25,6 +25,7 @@
     name: 'Bubble',
     data() {
       return {
+        score: 0,
         gameState: {},
         app: {},
         targetGraphics: {},
@@ -42,6 +43,7 @@
         targetColor: 0,
         targetRect: {},
         timedEvent: {},
+        batter:0,
         myBubble: {
           radius: 0,
           color: 0xffffff,
@@ -53,9 +55,9 @@
 
     beforeDestroy() {
       let canvas = document.getElementsByTagName('canvas')[0];
-      document.body.removeChild(canvas)
+      document.body.removeChild(canvas);
       if (this.timer) {
-        clearTimeout(this.timer)
+        clearTimeout(this.timer);
         this.timer = null
       }
     },
@@ -102,8 +104,9 @@
       gameConfig.width = self.windowWidth;
       gameConfig.height = self.windowHeight;
       self.game = new Phaser.Game(gameConfig);
+      this.score = 0;
+      this.batter = 0;
       document.getElementById('btn-set').style.display = 'none';
-
     },
 
 
@@ -114,14 +117,24 @@
         document.getElementById('btn-set').style.display = 'none';
         this.gameOverBlock.setVisible(false);
         this.gameOverText.setText('');
-
-
+        this.score = 0;
+        this.batter = 0;
         this.gameScene.scene.restart();
-      },
+        },
+
 
       endGame: function () {
         this.gameOverBlock.setVisible(true);
-        this.gameOverText.setText('Game Over');
+        this.gameOverText.setText('    Game Over\n Your score is ' + this.score);
+
+        if(localStorage.bubble){
+          let a = JSON.parse(localStorage.bubble);
+          a.push(this.score);
+          localStorage.bubble =  JSON.stringify(a)
+        }else {
+          let array = [this.score]
+          localStorage.bubble =  JSON.stringify(array)
+        }
 
         if (document.getElementById('btn-set')) {
           document.getElementById('btn-set').style.display = 'inline-block';
@@ -227,7 +240,7 @@
         this.gameOverBlock.fillRectShape(rec);
         this.gameOverBlock.setVisible(false);
 
-        this.gameOverText = this.gameScene.add.text(this.windowWidth / 2 - 140, this.windowHeight / 2 - 100, '', {fontSize: '54px'});
+        this.gameOverText = this.gameScene.add.text(this.windowWidth / 2 - 260, this.windowHeight / 2 - 100, '', {fontSize: '54px', fontColor: '#3f3f3f'});
 
 
       },
@@ -254,29 +267,59 @@
       },
 
       checkBubbleColor: function () {
-        if(!this.timer)
+        if (!this.timer)
           return
         if (this.timer.text.split('   ')[1] === '0') {
-          if (this.myBubble.color === this.targetColor) {
-            this.targetColor = this.randomColor();
-            this.targetRect = new Phaser.Geom.Rectangle(230, 40, 20, 20);
+          if (this.score >= 0) {
+            if (this.myBubble.color === this.targetColor) {
+              switch (this.batter){
+                case 0:
+                case 1:
+                case 2:
+                  this.score += 10;
+                  break;
+                case 3:
+                case 4:
+                case 5:
+                  this.score += 50;
+                  break;
+                case 6:
+                case 7:
+                case 8:
+                case 9:
+                case 10:
+                  this.score += 80;
+                  break;
+                default:
+                  this.score += 100;
+                  break;
+              }
+              this.batter++;
+              switch (this.batter){
 
-            this.targetGraphics = this.gameScene.add.graphics({fillStyle: {color: this.targetColor}});
-            this.targetGraphics.fillRectShape(this.targetRect);
+              }
+              this.targetColor = this.randomColor();
+              this.targetRect = new Phaser.Geom.Rectangle(230, 40, 20, 20);
 
-            this.targetRect.diameter = this.targetRect.radius;
+              this.targetGraphics = this.gameScene.add.graphics({fillStyle: {color: this.targetColor}});
+              this.targetGraphics.fillRectShape(this.targetRect);
 
-            this.timedEvent = this.gameScene.time.addEvent({
-              delay: 1000,
-              callback: this.checkBubbleColor,
-              callbackScope: this.gameScene,
-              repeat: this.targetTime
-            });
+              this.targetRect.diameter = this.targetRect.radius;
 
+              this.timedEvent = this.gameScene.time.addEvent({
+                delay: 1000,
+                callback: this.checkBubbleColor,
+                callbackScope: this.gameScene,
+                repeat: this.targetTime
+              });
+            } else {
+              this.batter = 0;
+              this.endGame();
+
+            }
           }
           else {
             this.endGame();
-
           }
         }
       },

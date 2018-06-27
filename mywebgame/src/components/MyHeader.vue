@@ -5,6 +5,7 @@
       <el-menu-item index="/test">Test</el-menu-item>
       <el-menu-item index="/bubble">Bubble</el-menu-item>
       <el-menu-item index="/cube">Cube</el-menu-item>
+      <el-menu-item index="/score">Score</el-menu-item>
 
     </el-menu>
     <div class="line"></div>

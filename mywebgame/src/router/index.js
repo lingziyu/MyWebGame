@@ -5,6 +5,7 @@ import Test from  '@/components/Test'
 import Bubble from '@/components/Bubble'
 import Cube from '@/components/Cube'
 import * as PIXI from 'pixi.js'
+import Score from '@/components/Score'
 
 PIXI.loader
   .add([
@@ -31,6 +32,10 @@ export default new Router({
       path: '/cube',
       name: 'Cube',
       component: Cube
+    },{
+      path: '/score',
+      name: 'Score',
+      component: Score
     }
   ]
 })

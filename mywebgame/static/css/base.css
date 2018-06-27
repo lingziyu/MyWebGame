@@ -7,15 +7,33 @@ body
 	overflow: hidden;
 }
 
+#dbscorelb{
+  margin-left: 30px;
+  font-size: 24pt;
+  color: #a3a3a3;
+  vertical-align: middle;
+
+}
+
+#dbscorev{
+  vertical-align: middle;
+
+  color: #a3a3a3;
+  font-size: 30pt;
+}
+
 
 #dblog{
   text-align: center;
   font-size: 50pt;
-  color: #3f3f3f;
+  /*color: #999333;*/
   margin-top: 180px;
 }
 #btnstart{
+  vertical-align: middle;
+
   color: white;
+  margin-bottom: 20px;
 }
 #dbtitle
 {

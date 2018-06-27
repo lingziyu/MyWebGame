@@ -228,6 +228,8 @@
       },
 
       end: function () {
+
+
         this.finalScore = this.initDifficult - this.difficult - this.error * 4;
         if (this.finalScore < 0) {
           this.finalScore = 0;
@@ -240,6 +242,16 @@
           document.getElementById('btn-set').style.display = 'inline-block';
         }
         this.myTicker.stop()
+
+        if(localStorage.test){
+          let a = JSON.parse(localStorage.test);
+          a.push(this.finalScore);
+          localStorage.test =  JSON.stringify(a)
+        }else {
+          let array = [this.finalScore]
+          localStorage.test =  JSON.stringify(array)
+        }
+
       },
 
       renewDifficult: function (descrese) {
